@@ -1,7 +1,6 @@
 from typing import Tuple
 
-from httpize.core.response import Response, StatusResponse
-from httpize.core.wrapper import tpify
+from tpify import Response, StatusResponse, tpify
 
 ResponseTypes = Tuple[Response, StatusResponse]
 
