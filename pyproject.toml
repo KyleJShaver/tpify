@@ -5,17 +5,18 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "tpify"
 version = "0.0.1-alpha"
-authors = [
-  { name="Kyle Shaver", email="kyle@tpify.dev" },
-]
+authors = [{ name = "Kyle Shaver", email = "kyle@tpify.dev" }]
 description = "Make Python calls respond like HTTP requests"
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
 ]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov"]
 
 [project.urls]
 Homepage = "https://github.com/KyleJShaver/tpify"
@@ -28,9 +29,5 @@ honor_noqa = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-testpaths = [
-    "tests",
-]
-pythonpath = [
-  "src"
-]
+testpaths = ["tests"]
+pythonpath = ["src"]

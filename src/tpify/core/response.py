@@ -7,6 +7,9 @@ class StatusResponse:
     status_code: int = 100
     content: Optional[Any] = None
 
+    def __repr__(self) -> str:
+        return f"<StatusResponse [{self.status_code}]>"
+
 
 @dataclass
 class Response:
