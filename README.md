@@ -21,6 +21,73 @@ All tpified functions return an object, removing the need to wrap functions in a
 If you can't find an HTTP status code that applies to your use case...are you sure?
 
 ## Examples
+### Pie syntax
+You can tpify a function using the standard pie syntax, which is how most decorators are used.
+```python
+from tpify import tpify
+
+@tpify
+def fibonacci(n: int) -> int:
+    if n < 0:
+        raise ValueError("Cannot compute Fibonacci number less than 0")
+    if n == 0:
+        return 0
+    if 1 <= n <= 2:
+        return 1
+    return fibonacci(n - 1).content + fibonacci(n - 2).content
+
+if __name__ == "__main__":
+    for fib_num in (
+        30,
+        5,
+        -1,
+    ):
+        print(fibonacci(fib_num).content)
+```
+> 832040<br>
+5<br>
+Cannot compute Fibonacci number less than 0
+
+
+### Named function
+The benefit to using the decorator pattern is that the decorator can be used to create a named function in the event that the function is already defined. In this case, we have a recursive function that we want to tpify. Since there is overhead in a tpified function, we can simply tpify the entrypoint to the recursive function, getting all the benefits with minimal overhead or impact.
+
+```python
+from tpify import tpify
+
+
+def fibonacci(n: int) -> int:
+    if n < 0:
+        raise ValueError("Cannot compute Fibonacci number less than 0")
+    if n == 0:
+        return 0
+    if 1 <= n <= 2:
+        return 1
+    return fibonacci(n - 1) + fibonacci(n - 2)
+
+
+fibonacci_tp = tpify(fibonacci)
+
+
+if __name__ == "__main__":
+    for fib_num in (
+        30,
+        5,
+        -1,
+    ):
+        try:
+            print(fibonacci(fib_num))
+        except Exception as e:
+            print(f"Exception: {e}")
+        print(fibonacci_tp(fib_num).content)
+```
+> 832040<br>
+832040<br>
+5<br>
+5<br>
+Exception: Cannot compute Fibonacci number less than 0<br>
+Cannot compute Fibonacci number less than 0
+
 ### JSON parsing
 Say we're taking input that we're attempting to parse as JSON. Typically, Python code would look like this:
 ```python
