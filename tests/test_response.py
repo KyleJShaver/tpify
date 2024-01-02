@@ -10,11 +10,11 @@ class TestCoreFunction:
             start = perf_counter()
             resp = double_number(n)
             return Response(
+                200,
+                resp,
                 double_number_tpified_response,
                 (n,),
                 None,
-                200,
-                resp,
                 {},
                 perf_counter() - start,
             )
@@ -54,11 +54,11 @@ class TestCoreFunction:
             start = perf_counter()
             resp = double_number(n)
             return Response(
+                200,
+                resp,
                 double_number_tpified_response_decorator,
                 (n,),
                 None,
-                200,
-                resp,
                 {},
                 perf_counter() - start,
             )
