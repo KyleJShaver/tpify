@@ -9,14 +9,17 @@ def tpify_function(func: Callable, *args, **kwargs) -> Response:
     resp = Response(func=func, args=args, kwargs=kwargs)
     try:
         result = func(*args, **kwargs)
-        if isinstance(result, Response):
-            return result
+        if type(result) not in (
+            Response,
+            StatusResponse,
+        ):
+            resp.content = result
+            resp.status_code = 200
         elif isinstance(result, StatusResponse):
             resp.content = result.content
             resp.status_code = result.status_code
         else:
-            resp.content = result
-            resp.status_code = 200
+            return result
     except Exception as e:
         resp.content = e
         resp.status_code = 500
