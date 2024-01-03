@@ -1,102 +1,86 @@
-from time import perf_counter
+import pytest
+from tpify import TPResponse, tp, tpify, tpify_function
+from tpify.core.wrapper import _DEFAULT_ERROR_CODE
 
-from tests.utils import double_number
-from tpify import Response, StatusResponse, tpify
+
+def double_number(n: int) -> int:
+    return n * 2
 
 
 class TestCoreFunction:
-    def test_tpified_response(_):
-        def double_number_tpified_response(n: int):
-            start = perf_counter()
-            resp = double_number(n)
-            return Response(
-                200,
-                resp,
-                double_number_tpified_response,
-                (n,),
-                None,
-                {},
-                perf_counter() - start,
-            )
-
-        arg_val = (2,)
-        resp = double_number_tpified_response(*arg_val)
-        assert isinstance(resp, Response)
-        assert resp.content == double_number(*arg_val)
-        assert resp.status_code == 200
-        assert str(resp) == "<Response [200]>"
-
-    def test_tpified_status_response(_):
-        def doble_number_tpified_status_response(n: int):
-            return StatusResponse(200, double_number(n))
-
-        arg_val = (2,)
-        resp = doble_number_tpified_status_response(*arg_val)
-        assert isinstance(resp, StatusResponse)
-        assert resp.content == double_number(*arg_val)
-        assert resp.status_code == 200
-        assert str(resp) == "<StatusResponse [200]>"
-
-    def test_double_number_decorator(_):
-        @tpify
+    def test_double_number_pie_syntax(_):
+        @tpify()
         def double_number_decorator(n: int):
             return double_number(n)
 
         arg_val = (2,)
         resp = double_number_decorator(*arg_val)
-        assert isinstance(resp, Response)
+        assert isinstance(resp, tuple)
+        assert isinstance(resp, TPResponse)
         assert resp.content == double_number(*arg_val)
-        assert resp.status_code == 200
+        assert resp.status_code == tp.OK
 
-    def test_double_number_tpified_response_decorator(_):
-        @tpify
-        def double_number_tpified_response_decorator(n: int):
-            start = perf_counter()
-            resp = double_number(n)
-            return Response(
-                200,
-                resp,
-                double_number_tpified_response_decorator,
-                (n,),
-                None,
-                {},
-                perf_counter() - start,
-            )
+    def test_double_number_named_function(_):
+        double_tp = tpify_function(double_number)
+        arg_val = (2,)
+        resp = double_tp(*arg_val)
+        assert isinstance(resp, tuple)
+        assert isinstance(resp, TPResponse)
+        assert resp.content == double_number(*arg_val)
+        assert resp.status_code == tp.OK
+
+    def test_too_many_tuple_vals(_):
+        @tpify()
+        def double_number_decorator(n: int):
+            return (tp.OK, n * 2, n, double_number_decorator)
 
         arg_val = (2,)
-        resp = double_number_tpified_response_decorator(*arg_val)
-        assert isinstance(resp, Response)
+        resp = double_number_decorator(*arg_val)
+        assert isinstance(resp, tuple)
+        assert isinstance(resp, TPResponse)
         assert resp.content == double_number(*arg_val)
-        assert resp.status_code == 200
-
-    def test_doble_number_tpified_status_response_decorator(_):
-        @tpify
-        def doble_number_tpified_status_response_decorator(n: int):
-            return StatusResponse(200, double_number(n))
-
-        arg_val = (2,)
-        resp = doble_number_tpified_status_response_decorator(*arg_val)
-        assert isinstance(resp, Response)
-        assert resp.content == double_number(*arg_val)
-        assert resp.status_code == 200
-        print(resp.func.__name__)
+        assert resp.status_code == tp.OK
 
 
 class TestExceptions:
-    def test_raise_exception_default_500(_):
-        @tpify
-        def raise_exception():
+    exception_type_map = {
+        ValueError: tp.InputError,
+        RuntimeError: tp.ProcessingError,
+    }
+
+    def test_raise_exception_default(_):
+        @tpify()
+        def raise_exception() -> TPResponse:
             raise Exception("This could be any exception in a function")
 
         resp = raise_exception()
-        assert resp.status_code == 500
+        assert resp.status_code == tp.ProcessingError
         assert isinstance(resp.content, Exception)
 
-    def test_raise_exception_status_response(_):
-        @tpify
+    def test_raise_exception_status(_):
+        @tpify()
         def raise_exception():
-            return StatusResponse(403, ValueError("You're not allowed to do that"))
+            return (tp.InputError, ValueError("You're not allowed to do that"))
 
         resp = raise_exception()
-        assert resp.status_code == 403
+        assert resp.status_code == tp.InputError
         assert isinstance(resp.content, ValueError)
+
+    @pytest.mark.parametrize(
+        "error,tp_status",
+        [
+            (ValueError("This is a ValueError"), tp.InputError),
+            (RuntimeError, tp.ProcessingError),
+            (IndentationError, tp.InputError),
+        ],
+    )
+    def test_raise_exception_status(self, error: Exception, tp_status: tp):
+        @tpify(exception_type_map=self.exception_type_map)
+        def raise_exception():
+            raise error
+
+        resp = raise_exception()
+        if type(resp.content) in self.exception_type_map:
+            assert resp.status_code == tp_status
+        else:
+            assert resp.status_code == _DEFAULT_ERROR_CODE

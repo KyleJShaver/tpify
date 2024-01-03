@@ -1,30 +1,40 @@
-from time import perf_counter
-from typing import Callable
+from functools import cache as cache_decorator
+from typing import Callable, Dict, Optional
 
-from tpify.core.response import Response, StatusResponse
+from tpify.core.response import TPResponse
+from tpify.core.status_code import TPStatus as tp
+
+_DEFAULT_ERROR_CODE = tp.ProcessingError
 
 
-def tpify(func: Callable):
-    def tpified_function(*args, **kwargs):
-        start = perf_counter()
-        resp = Response(func=func, args=args, kwargs=kwargs)
-        try:
-            result = func(*args, **kwargs)
-            if type(result) not in (
-                Response,
-                StatusResponse,
-            ):
-                resp.content = result
-                resp.status_code = 200
-            elif isinstance(result, StatusResponse):
-                resp.content = result.content
-                resp.status_code = result.status_code
-            else:
-                return result
-        except Exception as e:
-            resp.content = e
-            resp.status_code = 500
-        resp.elapsed = perf_counter() - start
-        return resp
+def tpify(exception_type_map: Optional[Dict[Exception, tp]] = None) -> Callable:
+    def tpify_function(func: Callable) -> Callable:
+        def tpified_function(*args, **kwargs) -> TPResponse:
+            try:
+                result = func(*args, **kwargs)
+                if (
+                    isinstance(result, tuple)
+                    and isinstance(result[0], tp)
+                    and len(result) >= 2
+                ):
+                    return TPResponse(result[0], result[1])
+                return TPResponse(
+                    tp.OK,
+                    result,
+                )
+            except Exception as e:
+                return TPResponse(
+                    (exception_type_map or dict()).get(type(e), _DEFAULT_ERROR_CODE),
+                    e,
+                )
 
-    return tpified_function
+        return tpified_function
+
+    return tpify_function
+
+
+def tpify_function(
+    func: Callable,
+    exception_type_map: Optional[Dict[Exception, tp]] = None,
+):
+    return tpify(exception_type_map=exception_type_map)(func)
