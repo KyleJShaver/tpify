@@ -24,7 +24,7 @@ Issues = "https://github.com/KyleJShaver/tpify/issues"
 
 [tool.isort]
 profile = "black"
-src_paths = ["src/requests", "test"]
+src_paths = ["src/tpify", "test"]
 honor_noqa = true
 
 [tool.pytest.ini_options]
