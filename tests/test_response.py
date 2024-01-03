@@ -8,38 +8,68 @@ def double_number(n: int) -> int:
 
 
 class TestCoreFunction:
-    def test_double_number_pie_syntax(_):
+    @pytest.mark.parametrize("n", [2])
+    def test_double_number_pie_syntax(_, n):
         @tpify()
         def double_number_decorator(n: int):
             return double_number(n)
 
-        arg_val = (2,)
-        resp = double_number_decorator(*arg_val)
+        resp = double_number_decorator(n)
         assert isinstance(resp, tuple)
         assert isinstance(resp, TPResponse)
-        assert resp.content == double_number(*arg_val)
+        assert resp.content == double_number(n)
         assert resp.status_code == tp.OK
 
-    def test_double_number_named_function(_):
+    @pytest.mark.parametrize("n", [2])
+    def test_double_number_named_function(_, n):
         double_tp = tpify_function(double_number)
-        arg_val = (2,)
-        resp = double_tp(*arg_val)
+        resp = double_tp(n)
         assert isinstance(resp, tuple)
         assert isinstance(resp, TPResponse)
-        assert resp.content == double_number(*arg_val)
+        assert resp.content == double_number(n)
         assert resp.status_code == tp.OK
 
-    def test_too_many_tuple_vals(_):
+    @pytest.mark.parametrize("n", [2])
+    def test_correct_tuple_vals(_, n):
+        @tpify()
+        def double_number_decorator(n: int):
+            return (
+                tp.OK,
+                n * 2,
+            )
+
+        resp = double_number_decorator(n)
+        assert isinstance(resp, tuple)
+        assert isinstance(resp, TPResponse)
+        assert resp.content == double_number(n)
+        assert resp.status_code == tp.OK
+
+    @pytest.mark.parametrize("n", [2])
+    def test_too_many_tuple_vals(_, n):
         @tpify()
         def double_number_decorator(n: int):
             return (tp.OK, n * 2, n, double_number_decorator)
 
-        arg_val = (2,)
-        resp = double_number_decorator(*arg_val)
+        resp = double_number_decorator(n)
         assert isinstance(resp, tuple)
         assert isinstance(resp, TPResponse)
-        assert resp.content == double_number(*arg_val)
+        assert resp.content == (
+            double_number(n),
+            n,
+            double_number_decorator,
+        )
         assert resp.status_code == tp.OK
+
+    @pytest.mark.parametrize("n", [2])
+    def test_non_tp_tuple(_, n):
+        @tpify()
+        def double_number_decorator(n: int):
+            return (2, n * 2, n, double_number_decorator)
+
+        resp = double_number_decorator(n)
+        assert isinstance(resp, tuple)
+        assert isinstance(resp, TPResponse)
+        assert resp.content == (2, 4, 2, double_number_decorator)
 
 
 class TestExceptions:

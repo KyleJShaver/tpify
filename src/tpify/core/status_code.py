@@ -10,7 +10,8 @@ class TPStatus(IntEnum):
     ProcessingError = 5
 
 
-TPStatusCustom = IntEnum
+class TPStatusCustom(IntEnum):
+    pass
 
 
 def append_statuses(statuses: Iterable[str]) -> TPStatusCustom:
