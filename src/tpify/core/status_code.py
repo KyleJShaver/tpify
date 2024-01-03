@@ -8,6 +8,10 @@ class TPStatus(IntEnum):
     Continue = 3
     InputError = 4
     ProcessingError = 5
+    Created = 6
+    Read = 7
+    Updated = 8
+    Deleted = 9
 
 
 class TPStatusCustom(IntEnum):
