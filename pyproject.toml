@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "tpify"
 version = "0.0.1-alpha"
 authors = [{ name = "Kyle Shaver", email = "kyle@tpify.dev" }]
-description = "Make Python calls respond like HTTP requests"
+description = "Return, don't raise."
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
