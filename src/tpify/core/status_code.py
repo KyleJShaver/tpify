@@ -16,9 +16,3 @@ class TPStatus(IntEnum):
 
 class TPStatusCustom(IntEnum):
     pass
-
-
-def append_statuses(statuses: Iterable[str]) -> TPStatusCustom:
-    return TPStatusCustom(
-        "TPStatusCustom", [status.name for status in TPStatus] + list(statuses)
-    )
