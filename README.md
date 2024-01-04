@@ -54,18 +54,18 @@ The `@tpify()` decorator takes an optional argument that maps raised exceptions 
 
 
   @tpify(exception_type_map={json.JSONDecodeError: tp.InputError})
-  def parse_json(json_str: str) -> Any:
+  def parse_json_tp(json_str: str) -> Any:
       return (tp.OK, json.loads(json_str))
 
 
   if __name__ == "__main__":
-      status, resp = parse_json('{"fibNum": 13}')
+      status, resp = parse_json_tp('{"fibNum": 13}')
       print(type(status))
       print(status == tp.OK)
       print(status == tp["OK"])
       print(resp)
 
-      status, resp = parse_json('{"fibNum": error}')
+      status, resp = parse_json_tp('{"fibNum": error}')
       print(type(status))
       print(status == tp.InputError)
       print(status == tp["InputError"])
@@ -99,18 +99,18 @@ You can add custom `TPStatus` values using `append_statuses_tp()`. This ends up 
 
 
   @tpify(exception_type_map={json.JSONDecodeError: new_tp.JSONParseFailed})
-  def parse_json(json_str: str) -> Any:
+  def parse_json_tp(json_str: str) -> Any:
       return (new_tp.JSONParseOK, json.loads(json_str))
 
 
   if __name__ == "__main__":
-      status, resp = parse_json('{"fibNum": 13}')
+      status, resp = parse_json_tp('{"fibNum": 13}')
       print(type(status))
       print(status == new_tp.JSONParseOK)
       print(status == new_tp["JSONParseOK"])
       print(resp)
 
-      status, resp = parse_json('{"fibNum": error}')
+      status, resp = parse_json_tp('{"fibNum": error}')
       print(type(status))
       print(status == new_tp.JSONParseFailed)
       print(status == new_tp["JSONParseFailed"])
