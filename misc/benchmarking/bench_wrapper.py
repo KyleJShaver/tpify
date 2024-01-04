@@ -5,7 +5,7 @@ from typing import Callable, Tuple
 
 from tpify import TPResponse, tp, tpify, tpify_function
 
-FIB_NUM = 10
+FIB_NUM = 13
 TIMEIT_ITERATIONS = 10_000
 
 
