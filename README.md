@@ -42,3 +42,85 @@ If you can't find a code that works for you, there is always the option to creat
     # TODO: Implement fibonacci recursively
   ```
 
+## Advanced uses
+### `exception_type_map`
+The `@tpify()` decorator takes an optional argument that maps raised exceptions to `TPStatus` codes. This allows you to map errors to status codes other than the default `TPStatus.ProcessingError` value. For example:
+
+  ```python
+  import json
+  from typing import Any
+
+  from tpify import append_statuses_tp, tp, tpify
+
+
+  @tpify(exception_type_map={json.JSONDecodeError: tp.InputError})
+  def parse_json(json_str: str) -> Any:
+      return (tp.OK, json.loads(json_str))
+
+
+  if __name__ == "__main__":
+      status, resp = parse_json('{"fibNum": 13}')
+      print(type(status))
+      print(status == tp.OK)
+      print(status == tp["OK"])
+      print(resp)
+
+      status, resp = parse_json('{"fibNum": error}')
+      print(type(status))
+      print(status == tp.InputError)
+      print(status == tp["InputError"])
+      print(resp)
+  ```
+  > <enum 'TPStatus'><br>
+True<br>
+True<br>
+{'fibNum': 13}<br>
+<enum 'TPStatus'><br>
+True<br>
+True
+
+### Adding custom `TPStatus` values
+You can add custom `TPStatus` values using `append_statuses_tp()`. This ends up creating a new `TPStatusCustom` object that contains the original `TPStatus` codes, as well as the new ones you request. Here's the gist of how that works:
+  ```python
+  import json
+  from typing import Any
+
+  from tpify import append_statuses_tp, tp, tpify
+
+  tp_raw_status, new_tp = append_statuses_tp(
+      statuses=(
+          "JSONParseOK",
+          "JSONParseFailed",
+      )
+  )
+  if tp_raw_status != tp.OK:
+      print(f"ERROR: Could not create new statuses: {new_tp}")
+      exit(1)
+
+
+  @tpify(exception_type_map={json.JSONDecodeError: new_tp.JSONParseFailed})
+  def parse_json(json_str: str) -> Any:
+      return (new_tp.JSONParseOK, json.loads(json_str))
+
+
+  if __name__ == "__main__":
+      status, resp = parse_json('{"fibNum": 13}')
+      print(type(status))
+      print(status == new_tp.JSONParseOK)
+      print(status == new_tp["JSONParseOK"])
+      print(resp)
+
+      status, resp = parse_json('{"fibNum": error}')
+      print(type(status))
+      print(status == new_tp.JSONParseFailed)
+      print(status == new_tp["JSONParseFailed"])
+      print(resp)
+  ```
+  > <enum 'TPStatusCustom'><br>
+True<br>
+True<br>
+{'fibNum': 13}<br>
+<enum 'TPStatusCustom'><br>
+True<br>
+True<br>
+Expecting value: line 1 column 12 (char 11)
