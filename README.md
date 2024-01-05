@@ -17,7 +17,7 @@ All tpified functions return an object, removing the need to wrap functions in a
 `TPResponse` objects contain status codes, enabling richer context about successes and failures. For example:
 * Functions that return `True` can return context about whether a new resource was created using `tp.Created` status, or updated using the `tp.Updated` status.
 * Functions that return `None` can return information about whether `None` means a successful or failed execution.
-* Failures can be returned that indicate if the error is an error with the input data (`tp.InputError` responses), or with the processing of the data iteself (`tp.ProcessingError` responses).
+* Failure origination can be returned to indicate if the error is an error with the input data (`tp.InputError` responses), or with the processing of the data iteself (`tp.ProcessingError` responses).
 If you can't find a code that works for you, there is always the option to create your own.
 
 ## Dos and Don'ts
@@ -87,33 +87,33 @@ You can add custom `TPStatus` values using `append_statuses_tp()`. This ends up 
 
   from tpify import append_statuses_tp, tp, tpify
 
-  tp_raw_status, new_tp = append_statuses_tp(
+  tp_status, tp_cust = append_statuses_tp(
       statuses=(
           "JSONParseOK",
           "JSONParseFailed",
       )
   )
-  if tp_raw_status != tp.OK:
-      print(f"ERROR: Could not create new statuses: {new_tp}")
+  if tp_status != tp.OK:
+      print(f"ERROR: Could not create new statuses: {tp_cust}")
       exit(1)
 
 
-  @tpify(exception_type_map={json.JSONDecodeError: new_tp.JSONParseFailed})
+  @tpify(exception_type_map={json.JSONDecodeError: tp_cust.JSONParseFailed})
   def parse_json_tp(json_str: str) -> Any:
-      return (new_tp.JSONParseOK, json.loads(json_str))
+      return (tp_cust.JSONParseOK, json.loads(json_str))
 
 
   if __name__ == "__main__":
       status, resp = parse_json_tp('{"fibNum": 13}')
       print(type(status))
-      print(status == new_tp.JSONParseOK)
-      print(status == new_tp["JSONParseOK"])
+      print(status == tp_cust.JSONParseOK)
+      print(status == tp_cust["JSONParseOK"])
       print(resp)
 
       status, resp = parse_json_tp('{"fibNum": error}')
       print(type(status))
-      print(status == new_tp.JSONParseFailed)
-      print(status == new_tp["JSONParseFailed"])
+      print(status == tp_cust.JSONParseFailed)
+      print(status == tp_cust["JSONParseFailed"])
       print(resp)
   ```
   > <enum 'TPStatusCustom'><br>

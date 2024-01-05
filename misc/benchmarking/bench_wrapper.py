@@ -1,7 +1,4 @@
-from functools import cache
-from time import perf_counter
 from timeit import timeit
-from typing import Callable, Tuple
 
 from tpify import TPResponse, tp, tpify, tpify_function
 
@@ -39,12 +36,12 @@ def fibonacci_tp(n: int = FIB_NUM) -> TPResponse:
     return fibonacci_tp(n - 1).content + fibonacci_tp(n - 2).content
 
 
-fibonacci_tp_named = tpify_function(fibonacci)
+fibonacci_named_tp = tpify_function(fibonacci)
 
 if __name__ == "__main__":
     fibonacci_time = timeit(fibonacci, number=TIMEIT_ITERATIONS)
     fibonacci_tp_time = timeit(fibonacci_tp, number=TIMEIT_ITERATIONS)
-    fibonacci_tp_named_time = timeit(fibonacci_tp_named, number=TIMEIT_ITERATIONS)
+    fibonacci_tp_named_time = timeit(fibonacci_named_tp, number=TIMEIT_ITERATIONS)
     print(
         f"{int((fibonacci_tp_time-fibonacci_time)/fibonacci_time*1000)/10.0}% slowdown using tpify"
     )
