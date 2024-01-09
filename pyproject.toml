@@ -16,7 +16,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-cov"]
+dev = ["pytest", "pytest-cov", "twine", "build"]
 
 [project.urls]
 Homepage = "https://github.com/KyleJShaver/tpify"
