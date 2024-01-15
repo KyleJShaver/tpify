@@ -1,13 +1,13 @@
 init:
 	python -m pip install '.[dev]'
 
-build:
+bundle:
 	make init
 	rm -rf dist
 	python -m build --sdist
 
 publish:
-	make build
+	make bundle
 	python -m twine upload --repository pypi dist/*
 
 test:
