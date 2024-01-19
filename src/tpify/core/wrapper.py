@@ -2,6 +2,7 @@ from functools import cache as cache_decorator
 from typing import Callable, Dict, Optional
 
 from tpify.core.response import TPResponse
+from tpify.core.result import TPResult, err, ok
 from tpify.core.status_code import TPStatus, TPStatusCustom
 
 _DEFAULT_ERROR_CODE = TPStatus.ProcessingError
@@ -46,3 +47,14 @@ def tpify_function(
     exception_type_map: Optional[Dict[Exception, TPStatus]] = None,
 ):
     return tpify(exception_type_map=exception_type_map)(func)
+
+
+def tpify_result(func: Callable) -> Callable:
+    def tpified_function(*args, **kwargs) -> TPResult:
+        try:
+            result = func(*args, **kwargs)
+            return ok(result)
+        except Exception as e:
+            return err(e)
+
+    return tpified_function
