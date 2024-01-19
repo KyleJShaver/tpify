@@ -16,3 +16,7 @@ test:
 	rm -rf htmlcov
 	python -m pytest --cov=src --cov-report html --cov-report term
 
+format:
+	make init
+	python -m black .
+	python -m isort .
